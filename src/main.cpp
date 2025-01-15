@@ -2,7 +2,7 @@
 #include "grid.hpp"
 #include "brella.hpp"
 
-int main() {
+int main() { 
     InitWindow(656, 544, "Pixel Art Maker");
     SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
 

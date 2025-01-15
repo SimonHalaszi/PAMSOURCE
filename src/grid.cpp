@@ -19,7 +19,7 @@ void Grid::CoverGrid(const Color& color) {
     }
 }
 
-void Grid::Draw() {
+void Grid::Draw() const {
     for(int row = 0; row < sizeRows; ++row) {
         for(int column = 0; column < sizeColumns; ++column) {
             DrawRectangle(column * pixelSize + 16, row * pixelSize + 16, pixelSize, pixelSize, grid[row][column]);
@@ -27,13 +27,13 @@ void Grid::Draw() {
     }    
 }
 
-void Grid::DrawHoverHighlight() {
+void Grid::DrawHoverHighlight() const {
     Vector2 highlightedSquare = FindPixelHovered();
     DrawRectangle(highlightedSquare.x * pixelSize + 16, highlightedSquare.y * pixelSize + 16, pixelSize, pixelSize, {50, 0, 0, 100});
    
 }
 
-Vector2 Grid::FindPixelHovered() {
+Vector2 Grid::FindPixelHovered() const {
     Vector2 pos = GetMousePosition();
     for(int row = 0; row < sizeRows; ++row) {
         for(int column = 0; column < sizeColumns; ++column) {
@@ -50,7 +50,16 @@ void Grid::ChangePixelColor(const Color& color) {
     grid[int(pixel.y)][int(pixel.x)] = color;
 }
 
-Color Grid::ColorPicker() {
+Color Grid::ColorPicker() const {
     Vector2 pixel = FindPixelHovered();
     return grid[int(pixel.y)][int(pixel.x)];
+}
+
+void Grid::PrintGridToConsole() const {
+    for(int row = 0; row < sizeRows; ++row) {
+        for(int column = 0; column < sizeColumns; ++column) {
+            std::cout << "{" << int(grid[row][column].r) << ", " << int(grid[row][column].g) << ", " << int(grid[row][column].b) << ", 255} ";
+        }
+        std::cout << std::endl;
+    }        
 }

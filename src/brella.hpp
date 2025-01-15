@@ -8,8 +8,11 @@ class Brella {
         Brella() : currentColor(white), pickingColor(false) {}
         void Draw();
         void HandleInputs();
+        void ExportCanvas();
         
     private:
+        Image exportCanvas;
+
         Color currentColor;
         Grid grid;
         std::vector<Color> palette = GetPaletteColors();
