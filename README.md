@@ -16,3 +16,8 @@ Pixel Art Program w/ Raylib
 <br> Brush Size Changer - Changes Brush Size </br>
 <br> Export - Exports Current Canvas </br>
 
+## Program Previews
+<br> Program UI </br>
+![Local image]("./uncroppedexport.png")
+<br> The Export! </br>
+![Local image]("./export.png")
