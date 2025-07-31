@@ -18,6 +18,7 @@ Pixel Art Program w/ Raylib
 
 ## Program Previews
 <br> Program UI </br>
-(https://github.com/SimonHalaszi/PAMSOURCE/blob/master/uncroppedexport.png)
+<img width="1284" height="896" alt="image" src="https://github.com/user-attachments/assets/512e8d96-d95e-49c7-92a1-5592ead3cc65" />
 <br> The Export! </br>
-![Local image]("./export.png")
+<img width="864" height="864" alt="image" src="https://github.com/user-attachments/assets/94ec1d8f-1f04-41a8-b10b-bf784844f0d1" />
+
