@@ -1,48 +1,44 @@
 #pragma once
 
+#include "constants.hpp"
 #include "grid.hpp"
 #include "colors.hpp"
+#include "rgbbutton.hpp"
+#include "palette.hpp"
+#include "brushsizebutton.hpp"
+#include "exportbutton.hpp"
+#include "clearbutton.hpp"
+#include "makerectbutton.hpp"
+#include "colorpickerbutton.hpp"
 
 class Brella {
     public:
-        Brella() : currentColor(white), pickingColor(false) {}
+        Brella();
         void Draw();
         void HandleInputs();
-        void ExportCanvas();
+        void PrintFPS();
         
     private:
-        Image exportCanvas;
-
         Color currentColor;
-        Grid grid;
-        std::vector<Color> palette = GetPaletteColors();
-        Font font = LoadFontEx("Font/monogram.ttf", 64, 0, 0);
-        bool pickingColor;
-
-        void SelectColor();
-        void ColorPicker();
-        
-        void ChangeRedChannel();
-        void ChangeGreenChannel();
-        void ChangeBlueChannel();
-        void ColorPickerToggle();
-
         void DrawCurrentColor();
-        void DrawPalette();
-        void DrawClearButton();
-        void DrawRGBButtons();
-        void DrawColorPickerButton();
 
-        void DrawRedChannelButton();
-        void DrawGreenChannelButton();
-        void DrawBlueChannelButton();
+        Grid grid;
 
-        bool InGridArea();
-        bool InPaletteArea();
-        bool InClearButton();
-        bool InColorPickerButton();        
+        Palette palette = Palette(PL_ORIGIN, defaultPaletteColors);
         
-        bool InRedChannelButton();
-        bool InGreenChannelButton();
-        bool InBlueChannelButton();
+        RGBButton redButton = RGBButton(RB_ORIGIN, Rgb);
+        RGBButton greenButton = RGBButton(GB_ORIGIN, rGb);
+        RGBButton blueButton = RGBButton(BB_ORIGIN, rgB);
+
+        BrushSizeButton brushSizeButton = BrushSizeButton(BS_ORIGIN);
+
+        ExportButton exportButton = ExportButton(EX_ORIGIN);
+
+        ClearButton clearButton = ClearButton(CL_ORIGIN);
+
+        MakeRectButton makeRectButton = MakeRectButton(RT_ORIGIN);
+    
+        ColorPickerButton colorPickerButton = ColorPickerButton{GC_ORIGIN};
 };
+
+

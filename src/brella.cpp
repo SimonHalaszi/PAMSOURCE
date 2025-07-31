@@ -1,226 +1,140 @@
 #include "brella.hpp"
+#include <string>
 
-void Brella::Draw() {
-    grid.Draw();
-    grid.DrawHoverHighlight();
-    DrawCurrentColor();
-    DrawPalette();
-    DrawClearButton();
-    DrawRGBButtons();
-    DrawColorPickerButton();
-}
-
-void Brella::SelectColor() {
-    int color = 0;
-    for(int i = 0; i < 3; ++i) {
-        for(int j = 0; j < 3; ++j, ++color) {
-            if(CheckCollisionPointRec(GetMousePosition(), {float(544) + (i * 32), float(144) + (j * 32), 32, 32})) {
-                currentColor = palette[color];
-                return;
-            }
-        }
-    }  
-}
-
-void Brella::HandleInputs() {
-    if(IsKeyPressed(KEY_E)) {
-        currentColor = white;
-    }
-    if(IsKeyPressed(KEY_R)) {
-        grid.CoverGrid(white);
-    }
-    if(IsKeyPressed(KEY_F)) {
-        grid.CoverGrid(currentColor);
-    }
-    if(!pickingColor && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-        if(InGridArea()) {
-            grid.ChangePixelColor(currentColor); 
-        }
-    }
-    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        if(InClearButton()) {
-            grid.CoverGrid(white);
-        }        
-        if(InPaletteArea()) {
-            SelectColor();
-        }       
-        if(InRedChannelButton()) {
-            ChangeRedChannel();
-        }
-        if(InGreenChannelButton()) {
-            ChangeGreenChannel();
-        }
-        if(InBlueChannelButton()) {
-            ChangeBlueChannel();
-        }
-        if(InColorPickerButton()) {
-            ColorPickerToggle();
-        }
-    }
-    if(pickingColor && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        if(InGridArea()) {
-            ColorPicker(); 
-        }
-    }
-    if(IsKeyPressed(KEY_ZERO)) {
-        grid.PrintGridToConsole();
-    }
-    if(IsKeyPressed(KEY_S)) {
-        ExportCanvas();
-    }
-}
-
-void Brella::ColorPicker() {
-    currentColor = grid.ColorPicker();
-    pickingColor = false;
+Brella::Brella() {
+    currentColor = white; 
 }
 
 void Brella::DrawCurrentColor() {
-    DrawRectangle(544, 16, 96, 96, currentColor);
+    DrawRectangle((CC_ORIGIN.x - BORDER_WIDTH), (CC_ORIGIN.y - BORDER_WIDTH), (BUTTON_LENGTH + (BORDER_WIDTH * 2)), (BUTTON_LENGTH + (BORDER_WIDTH * 2)), lightgray);
+    DrawRectangle((CC_ORIGIN.x), (CC_ORIGIN.y), BUTTON_LENGTH, BUTTON_LENGTH, currentColor);
 }
 
-void Brella::DrawClearButton() {
-    DrawRectangle(544, 272, 96, 32, white);
-    DrawTextEx(font, "CLEAR", {552, 272}, 24, 6, {26, 28, 44, 255});
+void Brella::PrintFPS() {
+    int FPS = GetFPS();
+    std::cout << FPS << std::endl;
 }
 
-void Brella::DrawRedChannelButton() {
-    DrawRectangle(540, 316, 104, 40, white);
-    DrawRectangle(544, 320, 96, 32, {currentColor.r, 0, 0, 255});
-    DrawTextEx(font, "--", {555, 320}, 24, 6, white);
-    DrawTextEx(font, "++", {600, 320}, 24, 6, white);    
-}
-
-void Brella::DrawGreenChannelButton() {
-    DrawRectangle(540, 364, 104, 40, white);
-    DrawRectangle(544, 368, 96, 32, {0, currentColor.g, 0, 255});
-    DrawTextEx(font, "--", {555, 368}, 24, 6, white);
-    DrawTextEx(font, "++", {600, 368}, 24, 6, white);    
-}
-
-void Brella::DrawBlueChannelButton() {
-    DrawRectangle(540, 412, 104, 40, white);
-    DrawRectangle(544, 416, 96, 32, {0, 0, currentColor.b, 255});
-    DrawTextEx(font, "--", {555, 416}, 24, 6, white);
-    DrawTextEx(font, "++", {600, 416}, 24, 6, white);
-}
-
-void Brella::DrawColorPickerButton() {
-    if(pickingColor) {
-        DrawRectangle(544, 464, 96, 32, green);
-    } else {
-        DrawRectangle(544, 464, 96, 32, white);
-    }
-    DrawTextEx(font, "GET COL.", {552, 464}, 24, 1, {26, 28, 44, 255});
-}
-
-void Brella::DrawRGBButtons() {
-    DrawRedChannelButton();
-    DrawGreenChannelButton();
-    DrawBlueChannelButton();
-}
-
-void Brella::DrawPalette() {
-    int color = 0;
-    for(int i = 0; i < 3; ++i) {
-        for(int j = 0; j < 3; ++j, ++color) {
-            DrawRectangle(544 + (i * 32), 144 + (j * 32), 32, 32, palette[color]);
+void Brella::Draw() {
+    grid.Draw();
+    
+    if(grid.Inside()) {
+        if(colorPickerButton.GetPickingColor() || (makeRectButton.GetMakingRect() && !makeRectButton.SelectedOnce())) {
+            grid.DrawHoverHighlight(0);
+        } 
+        else if(makeRectButton.GetMakingRect() && makeRectButton.SelectedOnce()) {
+            // DONT DRAW ANYTHING
+        }
+        else {
+            grid.DrawHoverHighlight(brushSizeButton.GetBrushRadius());
         }
     }
-    DrawTextEx(font, "PALETTE", {544, 112}, 24, 3, white);
-}
-
-bool Brella::InGridArea() {
-    return CheckCollisionPointRec(GetMousePosition(), {16, 16, GRID_SIZE_COLUMNS * grid.GetPixelSize(), GRID_SIZE_ROWS * grid.GetPixelSize()});
-}
-
-bool Brella::InPaletteArea() {
-    return CheckCollisionPointRec(GetMousePosition(), {544, 144, 96, 96});
-}
-
-bool Brella::InClearButton() {
-    return CheckCollisionPointRec(GetMousePosition(), {544, 272, 96, 32});
-}
-
-bool Brella::InRedChannelButton() {
-    return CheckCollisionPointRec(GetMousePosition(), {544, 320, 96, 32});
-}
-
-bool Brella::InGreenChannelButton() {
-    return CheckCollisionPointRec(GetMousePosition(), {544, 368, 96, 32});
-}
-
-bool Brella::InBlueChannelButton() {
-    return CheckCollisionPointRec(GetMousePosition(), {544, 416, 96, 32});
-}
-
-bool Brella::InColorPickerButton() {
-    return CheckCollisionPointRec(GetMousePosition(), {544, 464, 96, 32});
-}
-
-void Brella::ColorPickerToggle() {
-    if(pickingColor) {
-        pickingColor = false;
-    } else {
-        pickingColor = true;
+    if(makeRectButton.SelectedOnce()) {
+        grid.DrawRectSelection(makeRectButton.GetSelectionOne());
     }
+
+    DrawCurrentColor();
+    
+    palette.Draw();
+    brushSizeButton.Draw();
+    exportButton.Draw();
+    clearButton.Draw();
+    redButton.Draw(currentColor);
+    greenButton.Draw(currentColor);
+    blueButton.Draw(currentColor);   
+    makeRectButton.Draw(); 
+    colorPickerButton.Draw();
 }
 
-void Brella::ChangeRedChannel() {
-    if(CheckCollisionPointRec(GetMousePosition(), {544, 320, 48, 32})) {
-        if(currentColor.r <= 5) {
-            currentColor.r = 0;
-            return;
+void Brella::HandleInputs() {
+    static bool waitForMouseRelease = false;
+
+    if (!grid.Inside() && makeRectButton.SelectedOnce()) {
+        makeRectButton.SetSelectionOne({-1000, -1000});
+        makeRectButton.SetSelectionTwo({-1000, -1000});
+        makeRectButton.SetMakingRect(false);
+        waitForMouseRelease = false;
+    }
+
+    if (IsKeyPressed(KEY_E)) {
+        currentColor = white;
+    }
+    if (IsKeyPressed(KEY_C)) {
+        grid.CoverGrid(white);
+    }
+    if (IsKeyPressed(KEY_F)) {
+        grid.CoverGrid(currentColor);
+    }
+
+    // Key Binding for
+    if (IsKeyPressed(KEY_R)) {
+        makeRectButton.Toggle();
+    }
+
+    // Typical Drawing
+    if (!makeRectButton.GetMakingRect() && !colorPickerButton.GetPickingColor()) {
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            if (grid.Inside() && !waitForMouseRelease) {
+                grid.FillInCircle(GetMousePosition(), brushSizeButton.GetBrushRadius(), currentColor);
+            }
         }
-        currentColor.r -= 5;
     }
-    if(CheckCollisionPointRec(GetMousePosition(), {592, 320, 48, 32})) {      
-        if(currentColor.r >= 250) {
-            currentColor.r = 255;
-            return;
-        }        
-        currentColor.r += 5;
-    }
-}
 
-void Brella::ChangeGreenChannel() {
-    if(CheckCollisionPointRec(GetMousePosition(), {544, 368, 48, 32})) {
-        if(currentColor.g <= 5) {
-            currentColor.g = 0;
-            return;
+    // Checking for button clicks
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        if (clearButton.Inside()) {
+            grid.CoverGrid(white);
         }
-        currentColor.g -= 5;
+        if (palette.Inside()) {
+            currentColor = palette.SelectColor();
+        }
+        if (redButton.Inside()) {
+            currentColor.r = redButton.ChangeChannel(currentColor);
+        }
+        if (greenButton.Inside()) {
+            currentColor.g = greenButton.ChangeChannel(currentColor);
+        }
+        if (blueButton.Inside()) {
+            currentColor.b = blueButton.ChangeChannel(currentColor);
+        }
+        if (brushSizeButton.Inside()) {
+            brushSizeButton.ChangeBrushRadius();
+        }
+        if (colorPickerButton.Inside()) {
+            colorPickerButton.Toggle();
+        }
+        if (makeRectButton.Inside()) {
+            makeRectButton.Toggle();
+        }
+        if (exportButton.Inside()) {
+            exportButton.ExportCanvas();
+        }
     }
-    if(CheckCollisionPointRec(GetMousePosition(), {592, 368, 48, 32})) {       
-        if(currentColor.g >= 250) {
-            currentColor.g = 255;
-            return;
-        }                
-        currentColor.g += 5;
+    
+    // Handles MakeRect Logic
+    if (!colorPickerButton.GetPickingColor() && makeRectButton.GetMakingRect() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        if (grid.Inside()) {
+            makeRectButton.MakeRect(grid, currentColor);
+            waitForMouseRelease = true;
+        }
+    }
+
+    // Handles Color Picking Logic
+    if (colorPickerButton.GetPickingColor() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        if (grid.Inside()) {
+            colorPickerButton.ColorPicker(currentColor, grid);
+            waitForMouseRelease = true;
+        }
+    }
+
+    // Checking if Mouse button is released
+    if (waitForMouseRelease && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+        waitForMouseRelease = false;
+    }
+
+    // Debug function
+    if (IsKeyPressed(KEY_ZERO)) {
+        grid.PrintGridToConsole();
     }
 }
 
-void Brella::ChangeBlueChannel() {
-    if(CheckCollisionPointRec(GetMousePosition(), {544, 416, 48, 32})) {
-        if(currentColor.b <= 5) {
-            currentColor.b = 0;
-            return;
-        }        
-        currentColor.b -= 5;
-    }
-    if(CheckCollisionPointRec(GetMousePosition(), {592, 416, 48, 32})) {       
-        if(currentColor.b >= 250) {
-            currentColor.b = 255;
-            return;
-        }            
-        currentColor.b += 5;
-    }
-}
-
-void Brella::ExportCanvas() {
-    TakeScreenshot("uncroppedexport.png");
-    exportCanvas = LoadImage("uncroppedexport.png");
-    ImageCrop(&exportCanvas, {16, 16, grid.GetPixelSize() * grid.GetColumnCount(), grid.GetPixelSize() * grid.GetRowCount()});
-    ExportImage(exportCanvas, "export.png");
-    UnloadImage(exportCanvas);
-}
